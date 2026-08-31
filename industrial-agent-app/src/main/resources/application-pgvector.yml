@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${PGVECTOR_URL:jdbc:postgresql://10.162.21.87:5432/iot_ai}
+    username: ${PGVECTOR_USERNAME:postgres}
+    password: ${PGVECTOR_PASSWORD:PgVector@123456}
+  ai:
+    vectorstore:
+      type: pgvector
+      pgvector:
+        initialize-schema: true
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: ${ZHIPU_EMBEDDING_DIMENSIONS:1024}
+        max-document-batch-size: 100

@@ -1,0 +1,12 @@
+# Java / Maven build outputs
+target/
+*.class
+.m2/
+
+.idea/
+.vscode/
+*.iml
+*.log
+.env
+.DS_Store
+data/vector-store.json

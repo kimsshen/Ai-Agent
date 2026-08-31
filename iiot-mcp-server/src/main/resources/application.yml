@@ -1,0 +1,24 @@
+server:
+  port: ${MCP_SERVER_PORT:8082}
+
+spring:
+  application:
+    name: iiot-mcp-server
+  ai:
+    mcp:
+      server:
+        name: iiot-readonly-tools
+        version: 0.1.0
+        type: SYNC
+        protocol: STREAMABLE
+        instructions: 只提供设备状态、测点、告警和工单的只读查询能力。
+
+iiot:
+  api:
+    base-url: ${IIOT_API_BASE_URL:http://localhost:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

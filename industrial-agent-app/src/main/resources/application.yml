@@ -1,0 +1,51 @@
+server:
+  port: ${AGENT_APP_PORT:8080}
+
+spring:
+  application:
+    name: industrial-agent-app
+  profiles:
+    default: local-memory
+  ai:
+    model:
+      chat: openai
+      embedding: openai
+    openai:
+      base-url: ${ZHIPU_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      api-key: ${ZHIPU_API_KEY:540d25421eba4ee3b20043e1b2237dc4.nTOxv8wOv1ChtODi}
+      chat:
+        model: ${ZHIPU_CHAT_MODEL:glm-4-flash}
+        temperature: 0.1
+      embedding:
+        model: ${ZHIPU_EMBEDDING_MODEL:embedding-3}
+        dimensions: ${ZHIPU_EMBEDDING_DIMENSIONS:1024}
+    mcp:
+      client:
+        enabled: true
+        name: industrial-agent-mcp-client
+        version: 0.1.0
+        type: SYNC
+        initialized: true
+        request-timeout: 20s
+        toolcallback:
+          enabled: true
+        streamable-http:
+          connections:
+            iiot:
+              url: ${MCP_SERVER_BASE_URL:http://localhost:8082}
+              endpoint: /mcp
+
+industrial-ai:
+  rag:
+    top-k: ${RAG_TOP_K:4}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.25}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    org.springframework.ai.mcp: INFO
