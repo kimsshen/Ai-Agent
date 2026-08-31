@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class KnowledgeBootstrap implements ApplicationRunner {
@@ -51,10 +52,14 @@ public class KnowledgeBootstrap implements ApplicationRunner {
                 throw new IllegalStateException("Invalid knowledge section header: " + lines[0]);
             }
 
+            String knowledgeId = header[0].trim();
+            String vectorDocumentId = UUID.nameUUIDFromBytes(knowledgeId.getBytes(StandardCharsets.UTF_8)).toString();
+
             documents.add(Document.builder()
-                    .id(header[0].trim())
+                    .id(vectorDocumentId)
                     .text(lines[1].trim())
                     .metadata(Map.of(
+                            "knowledgeId", knowledgeId,
                             "deviceModel", header[1].trim(),
                             "documentType", header[2].trim(),
                             "source", header[3].trim()))
@@ -63,4 +68,3 @@ public class KnowledgeBootstrap implements ApplicationRunner {
         return documents;
     }
 }
-

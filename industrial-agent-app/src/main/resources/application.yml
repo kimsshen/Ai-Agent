@@ -5,7 +5,7 @@ spring:
   application:
     name: industrial-agent-app
   profiles:
-    default: local-memory
+    default: pgvector
   ai:
     model:
       chat: openai
