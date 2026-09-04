@@ -20,6 +20,7 @@
 
     <modules>
         <module>industrial-common</module>
+        <module>iiot-api-server</module>
         <module>iiot-api-mock</module>
         <module>iiot-mcp-server</module>
         <module>industrial-agent-app</module>
@@ -56,4 +57,3 @@
         </pluginManagement>
     </build>
 </project>
-

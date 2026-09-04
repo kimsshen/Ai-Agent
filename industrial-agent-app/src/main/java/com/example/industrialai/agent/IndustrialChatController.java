@@ -4,7 +4,8 @@ import com.example.industrialai.agent.rag.IndustrialRagService;
 import com.example.industrialai.agent.rag.IndustrialRagService.RagSource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -45,12 +47,15 @@ public class IndustrialChatController {
     }
 
     public record ChatRequest(
-            @NotBlank @Pattern(regexp = "DEV-\\d{3}") String deviceId,
-            @NotBlank String message) {
+            @NotBlank String channel,
+            @NotBlank String message,
+            Instant from,
+            Instant to,
+            @Min(1) @Max(365) Integer days) {
     }
 
     public record ChatResponse(
-            String deviceId,
+            String channel,
             String answer,
             List<RagSource> sources) {
     }
@@ -73,7 +78,7 @@ class IndustrialAgentService {
                 .user(buildPrompt(request, sources))
                 .call()
                 .content();
-        return new IndustrialChatController.ChatResponse(request.deviceId(), answer, sources);
+        return new IndustrialChatController.ChatResponse(request.channel(), answer, sources);
     }
 
     Flux<String> stream(IndustrialChatController.ChatRequest request) {
@@ -85,19 +90,27 @@ class IndustrialAgentService {
     }
 
     private String searchQuery(IndustrialChatController.ChatRequest request) {
-        return request.deviceId() + " 工业设备异常诊断 " + request.message();
+        return request.channel() + " push_log 告警类型 exception_name 告警内容 msg 创建时间 creation_date "
+                + request.message();
     }
 
     private String buildPrompt(IndustrialChatController.ChatRequest request, List<RagSource> sources) {
+        String from = request.from() == null ? "未指定（默认最近7天）" : request.from().toString();
+        String to = request.to() == null ? "未指定（默认当前时间）" : request.to().toString();
+        String days = request.days() == null ? "未指定（默认最近7天）" : request.days().toString();
         return """
-                设备编号：%s
+                消息通道/车间工序：%s
+                开始时间：%s
+                结束时间：%s
+                最近天数：%s（仅在未指定开始时间时生效）
                 用户问题：%s
 
-                以下是 RAG 检索到的内部知识。它只能作为诊断依据，设备当前状态必须调用 MCP 工具查询：
+                push_log 字段定义：channel 是消息通道，exception_name 是告警类型，msg 是告警内容，creation_date 是创建时间。
+                下面是可选的告警分析知识，只能用于解释字段和分析方法，不能代替数据库统计：
                 %s
 
-                请先调用 get_device_status；需要趋势或历史经验时，再调用 get_telemetry_history 和 query_work_orders。
-                最终答案必须引用上面的知识来源名称。
-                """.formatted(request.deviceId(), request.message(), ragService.renderContext(sources));
+                请调用 get_push_log_alarm_statistics 获取真实统计结果。
+                回答时给出统计时间范围、总告警数，并按 exception_name 和 msg 展示告警次数、首次发生时间、最后发生时间。
+                """.formatted(request.channel(), from, to, days, request.message(), ragService.renderContext(sources));
     }
 }

@@ -7,11 +7,11 @@ spring:
   ai:
     mcp:
       server:
-        name: iiot-readonly-tools
-        version: 0.1.0
+        name: push-log-readonly-tools
+        version: 0.2.0
         type: SYNC
         protocol: STREAMABLE
-        instructions: 只提供设备状态、测点、告警和工单的只读查询能力。
+        instructions: 只提供 push_log 告警统计和原有设备只读查询能力；push_log 的 channel 代表车间或工序。
 
 iiot:
   api:

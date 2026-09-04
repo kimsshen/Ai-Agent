@@ -1,0 +1,27 @@
+server:
+  port: ${IIOT_API_SERVER_PORT:${IIOT_API_PORT:8081}}
+
+spring:
+  application:
+    name: iiot-api-server
+  datasource:
+    url: ${IIOT_DB_URL:${PGVECTOR_URL:jdbc:postgresql://10.162.21.87:5432/iot_ai}}
+    username: ${IIOT_DB_USERNAME:${PGVECTOR_USERNAME:postgres}}
+    password: ${IIOT_DB_PASSWORD:${PGVECTOR_PASSWORD:PgVector@123456}}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${IIOT_DB_MAX_POOL_SIZE:10}
+      connection-timeout: ${IIOT_DB_CONNECTION_TIMEOUT:5000}
+      initialization-fail-timeout: -1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+iiot:
+  provider:
+    type: ${IIOT_PROVIDER_TYPE:in-memory}
+  push-log:
+    time-zone: ${IIOT_PUSH_LOG_TIME_ZONE:Asia/Shanghai}

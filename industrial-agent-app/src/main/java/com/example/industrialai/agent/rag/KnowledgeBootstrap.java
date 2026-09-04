@@ -19,7 +19,7 @@ import java.util.UUID;
 public class KnowledgeBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeBootstrap.class);
-    private static final String KNOWLEDGE_FILE = "knowledge/industrial-knowledge.md";
+    private static final String KNOWLEDGE_FILE = "knowledge/push-log-analysis.md";
 
     private final VectorStore vectorStore;
 
