@@ -16,7 +16,7 @@
 | Chat Model | 智谱 OpenAI-compatible API | 判断是否调用工具并生成诊断回答 |
 | MCP Client | Spring AI MCP Client | 将模型的工具调用发送给 MCP Server |
 | MCP Server | `iiot-mcp-server` | 暴露只读工业数据工具 |
-| IIoT API | 当前为 `iiot-api-mock` | 返回设备、测点、告警和工单数据 |
+| IIoT API | 当前为 `iiot-api-server` | 返回设备信息和 push_log 告警统计数据 |
 
 ## 2. 应用启动与知识入库
 

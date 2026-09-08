@@ -36,7 +36,7 @@ flowchart LR
 
 - [ ] **T03：定义工程结构**
   - 建立 Maven 多模块工程。
-  - 建议模块：`industrial-agent-app`、`iiot-mcp-server`、`iiot-api-mock`、`infra`、`sample-data`。
+  - 建议模块：`industrial-agent-app`、`iiot-mcp-server`、`iiot-api-server`、`infra`、`sample-data`。
 
 - [ ] **T04：搭建本地调试环境**
   - 准备本地 JDK、Maven、PostgreSQL 和 pgvector 扩展。

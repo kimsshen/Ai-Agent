@@ -15,7 +15,6 @@ Demo 只提供只读工业数据工具，不执行启停机、复位或参数下
 ```text
 industrial-common/       工业领域 DTO
 iiot-api-server/         统一 IIoT REST API（含 push_log 统计），端口 8081
-iiot-api-mock/            原有设备数据 Mock REST API（兼容保留）
 iiot-mcp-server/         Streamable HTTP MCP Server，端口 8082
 industrial-agent-app/    Spring AI + Chat Model + MCP Client + RAG，端口 8080
 infra/postgresql/        本地 PostgreSQL/pgvector 初始化脚本

@@ -20,6 +20,9 @@ management:
       exposure:
         include: health,info
 
+logging:
+  config: classpath:log4j2-spring.xml
+
 iiot:
   provider:
     type: ${IIOT_PROVIDER_TYPE:in-memory}

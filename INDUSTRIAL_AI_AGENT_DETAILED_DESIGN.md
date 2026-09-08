@@ -62,7 +62,7 @@ flowchart LR
     U[运维用户或上层应用] -->|REST / SSE| A[industrial-agent-app<br/>8080]
     A -->|OpenAI-compatible API| L[DeepSeek Chat Model]
     A -->|Streamable HTTP MCP| M[iiot-mcp-server<br/>8082]
-    M -->|REST| I[iiot-api-mock / IIoT API<br/>8081]
+    M -->|REST| I[iiot-api-server / IIoT API<br/>8081]
     A --> E[本地 ONNX Embedding]
     E --> V{VectorStore}
     V --> S[SimpleVectorStore<br/>local-memory]
@@ -76,7 +76,7 @@ flowchart LR
 | 模块 | 主要职责 | 对外协议 | 当前状态 |
 |---|---|---|---|
 | `industrial-common` | 统一设备、测点、告警、工单 DTO 与枚举 | Java 模块依赖 | 已实现 |
-| `iiot-api-mock` | 提供三台演示设备的状态、测点、告警和工单 REST API | HTTP/JSON，8081 | 已实现 |
+| `iiot-api-server` | 提供统一的设备信息和 push_log 告警统计 REST API | HTTP/JSON，8081 | 已实现 |
 | `iiot-mcp-server` | 将 IIoT REST API 封装为只读 MCP 工具 | Streamable HTTP MCP，8082 | 已实现 |
 | `industrial-agent-app` | 输入校验、RAG 检索、模型推理、MCP 工具调用、同步和流式输出 | HTTP/JSON、SSE，8080 | 已实现 |
 | `infra/postgresql` | pgvector 扩展初始化 | SQL | 已实现基础脚本 |
@@ -581,7 +581,7 @@ flowchart LR
 
 无需容器编排。服务启动顺序为：
 
-1. `iiot-api-mock`，确认 8081 健康。
+1. `iiot-api-server`，确认 8081 健康。
 2. `iiot-mcp-server`，确认 8082 健康并能访问 IIoT API。
 3. 设置 `DEEPSEEK_API_KEY`，启动 `industrial-agent-app`，确认 8080 健康。
 4. 使用 `local-memory` 时无需数据库；使用 `pgvector` 时应先准备 PostgreSQL 数据库并执行 `infra/postgresql/init.sql`。

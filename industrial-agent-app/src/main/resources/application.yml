@@ -36,6 +36,10 @@ spring:
               endpoint: /mcp
 
 industrial-ai:
+  knowledge:
+    upload-dir: ${KNOWLEDGE_UPLOAD_DIR:./data/knowledge}
+    chunk-size: ${KNOWLEDGE_CHUNK_SIZE:1200}
+    chunk-overlap: ${KNOWLEDGE_CHUNK_OVERLAP:200}
   rag:
     top-k: ${RAG_TOP_K:4}
     similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.25}
@@ -47,5 +51,4 @@ management:
         include: health,info,metrics
 
 logging:
-  level:
-    org.springframework.ai.mcp: INFO
+  config: classpath:log4j2-spring.xml
