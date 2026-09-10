@@ -51,7 +51,7 @@ public class IndustrialChatController {
     }
 
     public record ChatRequest(
-            @NotBlank String channel,
+            String channel,
             @NotBlank String message,
             Instant from,
             Instant to,
@@ -129,8 +129,7 @@ class IndustrialAgentService {
     }
 
     private String searchQuery(IndustrialChatController.ChatRequest request) {
-        return request.channel() + " push_log 告警类型 exception_name 告警内容 msg 创建时间 creation_date "
-                + request.message();
+        return request.message();
     }
 
     private String buildPrompt(
@@ -140,23 +139,30 @@ class IndustrialAgentService {
         String from = request.from() == null ? "未指定（默认最近7天）" : request.from().toString();
         String to = request.to() == null ? "未指定（默认当前时间）" : request.to().toString();
         String days = request.days() == null ? "未指定（默认最近7天）" : request.days().toString();
+        String selectedChannel = request.channel() == null || request.channel().isBlank()
+                ? "未选择"
+                : request.channel();
         String requiredChannels = explicitChannels.isEmpty()
-                ? "未从问题中提取到多个明确通道，使用页面选择的通道。"
+                ? "用户未在问题中明确指定通道；如需查询实际数据，可使用页面当前选择的通道。"
                 : String.join("、", explicitChannels);
         return """
-                消息通道/车间工序：%s
-                用户原文指定的统计通道：%s
-                开始时间：%s
-                结束时间：%s
-                最近天数：%s（仅在未指定开始时间时生效）
                 用户问题：%s
 
-                push_log 字段定义：channel 是消息通道，exception_name 是告警类型，msg 是告警内容，creation_date 是创建时间。
-                下面是可选的告警分析知识，只能用于解释字段和分析方法，不能代替数据库统计：
+                页面上下文（仅在用户要求查询实际工业数据时使用，回答通用问题时必须忽略）：
+                - 当前消息通道/车间工序：%s
+                - 用户原文明确指定的统计通道：%s
+                - 开始时间：%s
+                - 结束时间：%s
+                - 最近天数：%s（仅在未指定开始时间时生效）
+
+                以下是可选知识库片段。仅在与用户问题相关时引用或使用，不相关时忽略：
                 %s
 
-                请调用 get_push_log_alarm_statistics 获取真实统计结果。若“用户原文指定的统计通道”包含多个通道，必须逐个调用工具；调用参数必须逐字使用该列表，不得添加、删除或改写任何文字。
-                回答时给出统计时间范围、总告警数，并按 exception_name 和 msg 展示告警次数、首次发生时间、最后发生时间。
-                """.formatted(request.channel(), requiredChannels, from, to, days, request.message(), ragService.renderContext(sources));
+                先判断问题类型：通用问题直接回答；只有用户要求真实告警或设备数据时才调用相应只读工具。
+                查询多个明确通道时逐个调用工具，并原样传递通道名称。
+                用户要求图表或可视化时，按用户指定类型或分析目的选择合适的图形，并遵照系统图表协议输出 chart JSON 代码块。实际业务数据必须来自工具；每日趋势用 dailyCounts，分类对比或占比用相应真实统计，不能自行编造数据。
+                答案应贴合当前问题自然表达，不套用固定报表格式，也不要在行尾添加反斜杠。
+                """.formatted(request.message(), selectedChannel, requiredChannels, from, to, days,
+                ragService.renderContext(sources));
     }
 }

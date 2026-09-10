@@ -37,10 +37,6 @@ public class PushLogApiClient {
                 .body(CHANNELS_TYPE);
     }
 
-    public PushLogStatistics findStatistics(String channel, String from, String to) {
-        return findStatistics(channel, from, to, null);
-    }
-
     public PushLogStatistics findStatistics(String channel, String from, String to, Integer days) {
         String normalizedFrom = normalizeInstant(from, "from");
         String normalizedTo = normalizeInstant(to, "to");

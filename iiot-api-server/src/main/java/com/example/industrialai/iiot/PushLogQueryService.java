@@ -2,29 +2,42 @@ package com.example.industrialai.iiot;
 
 import com.example.industrialai.model.PushLogStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
 public class PushLogQueryService {
 
-    private static final Duration DEFAULT_LOOKBACK = Duration.ofDays(7);
+    private static final int DEFAULT_LOOKBACK_DAYS = 7;
 
     private final PushLogDataProvider provider;
     private final Clock clock;
+    private final ZoneId timeZone;
 
     @Autowired
-    public PushLogQueryService(PushLogDataProvider provider) {
-        this(provider, Clock.systemUTC());
+    public PushLogQueryService(
+            PushLogDataProvider provider,
+            @Value("${iiot.push-log.time-zone:Asia/Shanghai}") String timeZone) {
+        this(provider, Clock.systemUTC(), ZoneId.of(timeZone));
+    }
+
+    PushLogQueryService(PushLogDataProvider provider) {
+        this(provider, Clock.systemUTC(), ZoneId.of("Asia/Shanghai"));
     }
 
     PushLogQueryService(PushLogDataProvider provider, Clock clock) {
+        this(provider, clock, ZoneId.of("Asia/Shanghai"));
+    }
+
+    PushLogQueryService(PushLogDataProvider provider, Clock clock, ZoneId timeZone) {
         this.provider = provider;
         this.clock = clock;
+        this.timeZone = timeZone;
     }
 
     public PushLogStatistics getStatistics(String channel, Instant from, Instant to) {
@@ -36,7 +49,7 @@ public class PushLogQueryService {
         String normalizedChannel = normalizeChannel(channel);
         Instant resolvedTo = to == null ? clock.instant() : to;
         Instant resolvedFrom = from == null
-                ? resolvedTo.minus(resolveLookback(days))
+                ? resolveFrom(resolvedTo, days)
                 : from;
         if (!resolvedFrom.isBefore(resolvedTo)) {
             throw new IllegalArgumentException("from must be earlier than to");
@@ -55,11 +68,12 @@ public class PushLogQueryService {
         return channel.trim();
     }
 
-    private Duration resolveLookback(Integer days) {
-        if (days == null) {
-            return DEFAULT_LOOKBACK;
-        }
-        return Duration.ofDays(days);
+    private Instant resolveFrom(Instant to, Integer days) {
+        int lookbackDays = days == null ? DEFAULT_LOOKBACK_DAYS : days;
+        return to.atZone(timeZone).toLocalDate()
+                .minusDays(lookbackDays - 1L)
+                .atStartOfDay(timeZone)
+                .toInstant();
     }
 
     private void validateDays(Integer days) {

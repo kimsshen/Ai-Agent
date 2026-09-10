@@ -8,5 +8,6 @@ public record PushLogStatistics(
         Instant from,
         Instant to,
         long totalCount,
+        List<PushLogDailyCount> dailyCounts,
         List<PushLogChannelStatistics> channels) {
 }

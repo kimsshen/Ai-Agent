@@ -1,0 +1,8 @@
+.chart-card{width:100%;min-width:0;margin:14px 0 4px;padding:16px;border:1px solid #dfe7fa;border-radius:12px;background:#fff;color:#4b566b}
+.message.assistant:has(.chart-card){width:88%}.message.assistant:has(.chart-card) .message-body{width:100%}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}.chart-title{font-size:14px;font-weight:700;color:#33415c}.chart-head>span{font-size:11px;color:#8491a6;white-space:nowrap}
+.chart-scroll{overflow:auto;max-height:600px}.chart-card svg{display:block;width:100%;font:11px system-ui,"Microsoft YaHei",sans-serif;color:#728098}.chart-card svg text{fill:currentColor}.chart-grid{fill:none;stroke:#e8edf5;stroke-width:1}.chart-circle{max-width:440px;margin:auto}
+.chart-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0;font-size:12px}.chart-legend span{display:inline-flex;align-items:center;gap:6px;overflow-wrap:anywhere}.chart-legend i{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.chart-data{margin-top:12px;font-size:12px}.chart-data summary{cursor:pointer;color:#356df3}.chart-data table{width:100%;border-collapse:collapse;margin-top:8px;text-align:left;font-variant-numeric:tabular-nums}.chart-data td,.chart-data th{padding:6px 10px;border-bottom:1px solid #edf0f5;white-space:nowrap}
+.chart-loading,.chart-error{margin-top:10px;padding:12px;border:1px dashed #dce5f7;border-radius:9px;color:#8491a6;background:#f8faff;font-size:12px}.chart-error{color:#a55d5d;background:#fff8f8;border-color:#f5dede}
+@media(max-width:700px){.message.assistant:has(.chart-card){width:94%}.chart-card{padding:10px}}

@@ -28,7 +28,7 @@ public class PushLogReadOnlyTools {
 
     @McpTool(
             name = "get_push_log_alarm_statistics",
-            description = "按消息通道、时间范围统计 push_log 的告警类型 exception_name、告警内容 msg、告警次数以及首次和最后发生时间。",
+            description = "按消息通道、时间范围统计 push_log 告警；返回总数、按日次数 dailyCounts，以及按告警类型和内容聚合的明细。dailyCounts 可直接用于趋势图或柱状图。",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
                     readOnlyHint = true, destructiveHint = false, idempotentHint = true, openWorldHint = false))

@@ -2,6 +2,7 @@ package com.example.industrialai.iiot;
 
 import com.example.industrialai.model.PushLogAlarmItem;
 import com.example.industrialai.model.PushLogChannelStatistics;
+import com.example.industrialai.model.PushLogDailyCount;
 import com.example.industrialai.model.PushLogStatistics;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /** PostgreSQL read-only access for the push_log alarm table. */
 @Component
@@ -77,10 +81,43 @@ public class JdbcPushLogDataProvider implements PushLogDataProvider {
                         entry.getValue().stream().mapToLong(PushLogAlarmItem::count).sum(),
                         entry.getValue()))
                 .toList();
+        List<PushLogDailyCount> dailyCounts = findDailyCounts(query);
         return new PushLogStatistics(
                 channel, from, to,
                 channels.stream().mapToLong(PushLogChannelStatistics::totalCount).sum(),
+                dailyCounts,
                 channels);
+    }
+
+    private List<PushLogDailyCount> findDailyCounts(PushLogQuery query) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT CAST(CAST(creation_date AS TIMESTAMP) AS DATE) AS alarm_date,
+                       COUNT(*) AS alarm_count
+                FROM push_log
+                WHERE CAST(creation_date AS TIMESTAMP) >= CAST(? AS TIMESTAMP)
+                  AND CAST(creation_date AS TIMESTAMP) < CAST(? AS TIMESTAMP)
+                """);
+        List<Object> args = new ArrayList<>(List.of(
+                formatBoundary(query.from()), formatBoundary(query.to())));
+        if (query.channel() != null) {
+            sql.append(" AND channel = ? ");
+            args.add(query.channel());
+        }
+        sql.append("""
+                GROUP BY CAST(CAST(creation_date AS TIMESTAMP) AS DATE)
+                ORDER BY alarm_date
+                """);
+        List<PushLogDailyCount> observed = jdbcTemplate.query(
+                sql.toString(), (rs, rowNum) -> new PushLogDailyCount(
+                rs.getDate("alarm_date").toLocalDate(),
+                rs.getLong("alarm_count")), args.toArray());
+        Map<LocalDate, Long> observedCounts = observed.stream().collect(Collectors.toMap(
+                PushLogDailyCount::date,
+                PushLogDailyCount::count,
+                Long::sum,
+                TreeMap::new));
+        return PushLogDailyBuckets.fillMissingDays(
+                observedCounts, query.from(), query.to(), timeZone);
     }
 
     @Override

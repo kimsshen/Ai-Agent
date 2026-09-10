@@ -19,12 +19,12 @@ class PushLogQueryServiceTest {
     void normalizesChannelAndUsesHalfOpenDefaultWindow() {
         PushLogDataProvider provider = mock(PushLogDataProvider.class);
         PushLogQueryService service = new PushLogQueryService(
-                provider, Clock.fixed(NOW, ZoneOffset.UTC));
+                provider, Clock.fixed(NOW, ZoneOffset.UTC), ZoneOffset.UTC);
 
         service.getStatistics("  assembly-line  ", null, null);
 
         verify(provider).findStatistics(new PushLogQuery(
-                "assembly-line", NOW.minusSeconds(7 * 24 * 60 * 60), NOW));
+                "assembly-line", Instant.parse("2026-08-29T00:00:00Z"), NOW));
     }
 
     @Test
@@ -43,12 +43,12 @@ class PushLogQueryServiceTest {
     void usesRequestedDaysWhenTimeRangeIsOmitted() {
         PushLogDataProvider provider = mock(PushLogDataProvider.class);
         PushLogQueryService service = new PushLogQueryService(
-                provider, Clock.fixed(NOW, ZoneOffset.UTC));
+                provider, Clock.fixed(NOW, ZoneOffset.UTC), ZoneOffset.UTC);
 
         service.getStatistics("assembly-line", null, null, 3);
 
         verify(provider).findStatistics(new PushLogQuery(
-                "assembly-line", NOW.minusSeconds(3 * 24 * 60 * 60), NOW));
+                "assembly-line", Instant.parse("2026-09-02T00:00:00Z"), NOW));
     }
 
     @Test
