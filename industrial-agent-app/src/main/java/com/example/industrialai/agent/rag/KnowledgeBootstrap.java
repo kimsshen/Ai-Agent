@@ -19,7 +19,9 @@ import java.util.UUID;
 public class KnowledgeBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeBootstrap.class);
-    private static final String KNOWLEDGE_FILE = "knowledge/push-log-analysis.md";
+    private static final List<String> KNOWLEDGE_FILES = List.of(
+            "knowledge/industrial-knowledge.md",
+            "knowledge/push-log-analysis.md");
 
     private final VectorStore vectorStore;
 
@@ -29,13 +31,16 @@ public class KnowledgeBootstrap implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String markdown = new ClassPathResource(KNOWLEDGE_FILE)
-                .getContentAsString(StandardCharsets.UTF_8);
-        List<Document> documents = parseDocuments(markdown);
+        List<Document> documents = new ArrayList<>();
+        for (String knowledgeFile : KNOWLEDGE_FILES) {
+            String markdown = new ClassPathResource(knowledgeFile)
+                    .getContentAsString(StandardCharsets.UTF_8);
+            documents.addAll(parseDocuments(markdown));
+        }
 
         vectorStore.delete(documents.stream().map(Document::getId).toList());
         vectorStore.add(documents);
-        log.info("Loaded {} industrial knowledge chunks into {}", documents.size(), vectorStore.getClass().getSimpleName());
+        log.info("Loaded {} knowledge chunks into {}", documents.size(), vectorStore.getClass().getSimpleName());
     }
 
     static List<Document> parseDocuments(String markdown) {
@@ -48,11 +53,13 @@ public class KnowledgeBootstrap implements ApplicationRunner {
 
             String[] lines = section.split("\\R", 2);
             String[] header = lines[0].replace("## DOC:", "").trim().split("\\|");
-            if (header.length != 4 || lines.length != 2) {
+            if ((header.length != 3 && header.length != 4) || lines.length != 2) {
                 throw new IllegalStateException("Invalid knowledge section header: " + lines[0]);
             }
 
             String knowledgeId = header[0].trim();
+            int documentTypeIndex = header.length - 2;
+            int sourceIndex = header.length - 1;
             String vectorDocumentId = UUID.nameUUIDFromBytes(knowledgeId.getBytes(StandardCharsets.UTF_8)).toString();
 
             documents.add(Document.builder()
@@ -60,9 +67,8 @@ public class KnowledgeBootstrap implements ApplicationRunner {
                     .text(lines[1].trim())
                     .metadata(Map.of(
                             "knowledgeId", knowledgeId,
-                            "deviceModel", header[1].trim(),
-                            "documentType", header[2].trim(),
-                            "source", header[3].trim()))
+                            "documentType", header[documentTypeIndex].trim(),
+                            "source", header[sourceIndex].trim()))
                     .build());
         }
         return documents;

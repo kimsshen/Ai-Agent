@@ -47,7 +47,6 @@ public class IndustrialRagService {
             RagSource source = sources.get(index);
             context.append("[知识片段 ").append(index + 1).append("]\n")
                     .append("来源：").append(source.source()).append('\n')
-                    .append("设备型号：").append(source.deviceModel()).append('\n')
                     .append(source.text()).append("\n\n");
         }
         return context.toString();
@@ -58,7 +57,6 @@ public class IndustrialRagService {
                 document.getId(),
                 document.getText(),
                 String.valueOf(document.getMetadata().getOrDefault("source", "unknown")),
-                String.valueOf(document.getMetadata().getOrDefault("deviceModel", "ALL")),
                 String.valueOf(document.getMetadata().getOrDefault("documentType", "unknown")),
                 document.getScore());
     }
@@ -67,9 +65,7 @@ public class IndustrialRagService {
             String id,
             String text,
             String source,
-            String deviceModel,
             String documentType,
             Double score) {
     }
 }
-

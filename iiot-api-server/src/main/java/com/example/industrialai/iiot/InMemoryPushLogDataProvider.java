@@ -4,6 +4,7 @@ import com.example.industrialai.model.PushLogAlarmItem;
 import com.example.industrialai.model.PushLogChannelStatistics;
 import com.example.industrialai.model.PushLogDailyCount;
 import com.example.industrialai.model.PushLogStatistics;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class InMemoryPushLogDataProvider implements PushLogDataProvider {
     private final ZoneId timeZone;
     private final List<PushLogEntry> entries;
 
+    @Autowired
     public InMemoryPushLogDataProvider(
             @Value("${iiot.push-log.time-zone:Asia/Shanghai}") String timeZone) {
         this(Clock.systemUTC(), ZoneId.of(timeZone));

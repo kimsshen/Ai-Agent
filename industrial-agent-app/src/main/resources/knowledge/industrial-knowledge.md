@@ -1,4 +1,4 @@
-## DOC:mtr-x200-temp|MTR-X200|alarm-guide|MTR-X200 报警码手册 3.2 节
+## DOC:mtr-x200-temp|alarm-guide|MTR-X200 报警码手册 3.2 节
 # MTR-TEMP-HIGH 轴承温度高
 
 触发条件：驱动端或非驱动端轴承温度持续 3 分钟高于 85°C。
@@ -12,7 +12,7 @@
 安全要求：AI 只能给出处置建议，不得直接执行停机、复位或参数下发。
 
 ---
-## DOC:mtr-x200-vibration|MTR-X200|sop|旋转设备振动异常 SOP-07
+## DOC:mtr-x200-vibration|sop|旋转设备振动异常 SOP-07
 # MTR-VIB-HIGH 振动速度高
 
 MTR-X200 正常振动速度通常低于 4.5 mm/s；超过 7.1 mm/s 进入预警区。
@@ -22,13 +22,13 @@ MTR-X200 正常振动速度通常低于 4.5 mm/s；超过 7.1 mm/s 进入预警�
 建议采集至少 12 个历史点确认趋势。任何停机操作都必须由现场授权人员确认。
 
 ---
-## DOC:comp-c90-vibration|COMP-C90|sop|空压机维护手册 5.4 节
+## DOC:comp-c90-vibration|sop|空压机维护手册 5.4 节
 # COMP-VIB-HIGH 空压机振动偏高
 
 先核对二级转子振动趋势，再检查联轴器对中、地脚螺栓、轴承状态和入口工况。振动超过 7.1 mm/s 且持续上升时应降载运行，并安排频谱分析。不得仅依据单点数据直接判断转子损坏。
 
 ---
-## DOC:general-diagnosis|ALL|safety-policy|工业设备 AI 诊断安全规范
+## DOC:general-diagnosis|safety-policy|工业设备 AI 诊断安全规范
 # 工业 AI 诊断边界
 
 诊断必须同时给出实时数据、活动告警、知识依据和不确定性。设备数据与文档冲突时，以经过校验的实时数据为现状依据，以制造商手册作为阈值和处置参考。AI Agent 默认只读；启停机、复位、旁路保护、修改设定值等动作必须经过身份鉴别、权限校验和人工二次确认。

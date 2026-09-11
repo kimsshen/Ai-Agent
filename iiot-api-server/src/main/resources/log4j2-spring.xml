@@ -3,15 +3,19 @@
     <Properties>
         <Property name="LOG_DIR">${env:LOG_PATH:-logs}</Property>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n%throwable{full}</Property>
+        <Property name="consoleThreshold">${env:CONSOLE_LOG_LEVEL:-INFO}</Property>
+        <Property name="fileThreshold">${env:FILE_LOG_LEVEL:-DEBUG}</Property>
     </Properties>
 
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <ThresholdFilter level="${consoleThreshold}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
         </Console>
         <RollingFile name="RollingFile"
                      fileName="${LOG_DIR}/iiot-api-server.log"
                      filePattern="${LOG_DIR}/archive/iiot-api-server-%d{yyyy-MM-dd}-%i.log.gz">
+            <ThresholdFilter level="${fileThreshold}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>

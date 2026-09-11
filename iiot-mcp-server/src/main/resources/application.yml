@@ -11,7 +11,7 @@ spring:
         version: 0.2.0
         type: SYNC
         protocol: STREAMABLE
-        instructions: 只提供 push_log 告警统计和原有设备只读查询能力；push_log 的 channel 代表车间或工序。
+        instructions: 只提供 push_log 告警统计能力；push_log 的 channel 代表车间或工序。
 
 iiot:
   api:

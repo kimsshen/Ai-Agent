@@ -16,7 +16,7 @@
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>industrial-ai-agent-demo</name>
-    <description>Spring AI + DeepSeek + MCP + IIoT + pgvector runnable demo</description>
+    <description>Spring AI knowledge base with document ingestion and pgvector RAG</description>
 
     <modules>
         <module>industrial-common</module>
