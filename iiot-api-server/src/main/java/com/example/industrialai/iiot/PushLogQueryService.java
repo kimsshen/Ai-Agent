@@ -3,6 +3,8 @@ package com.example.industrialai.iiot;
 import com.example.industrialai.model.PushLogStatistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -14,6 +16,7 @@ import java.util.List;
 public class PushLogQueryService {
 
     private static final int DEFAULT_LOOKBACK_DAYS = 7;
+    private static final Logger log = LoggerFactory.getLogger(PushLogQueryService.class);
 
     private final PushLogDataProvider provider;
     private final Clock clock;
@@ -54,7 +57,26 @@ public class PushLogQueryService {
         if (!resolvedFrom.isBefore(resolvedTo)) {
             throw new IllegalArgumentException("from must be earlier than to");
         }
-        return provider.findStatistics(new PushLogQuery(normalizedChannel, resolvedFrom, resolvedTo));
+        log.info("PUSH_LOG_QUERY requestedChannel={} normalizedChannel={} requestedFrom={} requestedTo={} "
+                        + "days={} resolvedFrom={} resolvedTo={}",
+                channel, normalizedChannel, from, to, days, resolvedFrom, resolvedTo);
+        PushLogQuery query = new PushLogQuery(normalizedChannel, resolvedFrom, resolvedTo);
+        PushLogStatistics statistics = provider.findStatistics(query);
+        if (normalizedChannel == null || statistics == null || statistics.totalCount() > 0) {
+            logResult(statistics, false);
+            return statistics;
+        }
+
+        String resolvedChannel = resolveUniqueChannel(normalizedChannel);
+        if (resolvedChannel.equals(normalizedChannel)) {
+            logResult(statistics, false);
+            return statistics;
+        }
+        log.info("Resolved abbreviated push_log channel '{}' to '{}'", normalizedChannel, resolvedChannel);
+        PushLogStatistics resolvedStatistics = provider.findStatistics(
+                new PushLogQuery(resolvedChannel, resolvedFrom, resolvedTo));
+        logResult(resolvedStatistics, true);
+        return resolvedStatistics;
     }
 
     public List<String> getChannels() {
@@ -66,6 +88,33 @@ public class PushLogQueryService {
             return null;
         }
         return channel.trim();
+    }
+
+    private String resolveUniqueChannel(String requestedChannel) {
+        List<String> availableChannels = provider.findChannels();
+        if (availableChannels == null || availableChannels.isEmpty()) {
+            return requestedChannel;
+        }
+        List<String> matches = availableChannels.stream()
+                .filter(candidate -> candidate != null && !candidate.isBlank())
+                .map(String::trim)
+                .filter(candidate -> candidate.contains(requestedChannel)
+                        || requestedChannel.contains(candidate))
+                .distinct()
+                .toList();
+        return matches.size() == 1 ? matches.get(0) : requestedChannel;
+    }
+
+    private void logResult(PushLogStatistics statistics, boolean usedChannelFallback) {
+        log.info("PUSH_LOG_RESULT channel={} from={} to={} totalCount={} dailyBucketCount={} "
+                        + "channelCount={} usedChannelFallback={}",
+                statistics == null ? null : statistics.channel(),
+                statistics == null ? null : statistics.from(),
+                statistics == null ? null : statistics.to(),
+                statistics == null ? null : statistics.totalCount(),
+                statistics == null || statistics.dailyCounts() == null ? 0 : statistics.dailyCounts().size(),
+                statistics == null || statistics.channels() == null ? 0 : statistics.channels().size(),
+                usedChannelFallback);
     }
 
     private Instant resolveFrom(Instant to, Integer days) {

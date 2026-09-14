@@ -4,13 +4,14 @@
         <Property name="LOG_DIR">${env:LOG_PATH:-logs}</Property>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n%throwable{full}</Property>
         <Property name="consoleThreshold">${env:CONSOLE_LOG_LEVEL:-INFO}</Property>
+        <Property name="consoleCharset">${env:CONSOLE_CHARSET:-${sys:native.encoding}}</Property>
         <Property name="fileThreshold">${env:FILE_LOG_LEVEL:-DEBUG}</Property>
     </Properties>
 
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <ThresholdFilter level="${consoleThreshold}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
+            <PatternLayout pattern="${LOG_PATTERN}" charset="${consoleCharset}"/>
         </Console>
 
         <RollingFile name="RollingFile"

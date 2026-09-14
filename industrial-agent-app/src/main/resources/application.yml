@@ -16,6 +16,7 @@ spring:
       chat:
         model: ${ZHIPU_CHAT_MODEL:glm-4-flash}
         temperature: 0.1
+        timeout: ${ZHIPU_CHAT_TIMEOUT:180s}
       embedding:
         model: ${ZHIPU_EMBEDDING_MODEL:embedding-3}
         dimensions: ${ZHIPU_EMBEDDING_DIMENSIONS:1024}
@@ -32,7 +33,7 @@ spring:
         streamable-http:
           connections:
             iiot:
-              url: ${MCP_SERVER_BASE_URL:http://localhost:8082}
+              url: ${IIOT_MCP_BASE_URL:${MCP_SERVER_BASE_URL:http://localhost:8081}}
               endpoint: /mcp
 
 industrial-ai:

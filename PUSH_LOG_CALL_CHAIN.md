@@ -30,19 +30,11 @@ IndustrialAgentService
   v
 Spring AI MCP Client
   |
-  | MCP 协议调用
-  v
-iiot-mcp-server
-  |
-  | PushLogReadOnlyTools.getPushLogAlarmStatistics()
-  v
-PushLogApiClient
-  |
-  | GET /api/iiot/push-logs/statistics
+  | MCP 协议调用 http://localhost:8081/mcp
   v
 iiot-api-server
   |
-  | PushLogController.statistics()
+  | PushLogReadOnlyTools.getPushLogAlarmStatistics()
   v
 PushLogQueryService
   |
@@ -61,7 +53,7 @@ PostgreSQL
   v
 PushLogStatistics
   |
-  | API -> MCP -> 大模型
+  | MCP -> 大模型
   | 大模型根据真实统计结果组织中文答案
   v
 ChatResponse
@@ -78,8 +70,7 @@ ChatResponse
 | Agent 接入层 | `IndustrialChatController` | 接收 `/api/chat` 请求，返回答案 |
 | Agent 编排层 | `IndustrialAgentService` | 执行 RAG、构造提示词、调用大模型 |
 | RAG 层 | `IndustrialRagService` | 从向量库检索辅助知识，生成 `sources` |
-| MCP 工具层 | `PushLogReadOnlyTools` | 向大模型暴露 `get_push_log_alarm_statistics` 工具 |
-| MCP HTTP 层 | `PushLogApiClient` | 将工具调用转成 API 请求 |
+| MCP 工具层 | `PushLogReadOnlyTools` | 向大模型暴露工具，并直接调用业务层 |
 | API 控制层 | `PushLogController` | 接收 push_log 统计请求 |
 | 业务层 | `PushLogQueryService` | 标准化 channel 和时间范围 |
 | 数据访问层 | `JdbcPushLogDataProvider` | 拼接并执行参数化 SQL |
@@ -158,7 +149,8 @@ to
 days
 ```
 
-MCP Server 不直接访问数据库，而是通过 `PushLogApiClient` 调用 API Server。
+MCP Server 与 REST API 位于同一个 `iiot-api-server` 进程中。MCP Tool 直接调用
+`PushLogQueryService`，REST Controller 也调用同一业务层，两种入口共享完全一致的统计口径。
 
 ## 5. API 层时间处理
 
@@ -291,8 +283,7 @@ mvn -pl iiot-api-server spring-boot:run
 
 - [IndustrialChatController.java](industrial-agent-app/src/main/java/com/example/industrialai/agent/IndustrialChatController.java)
 - [IndustrialRagService.java](industrial-agent-app/src/main/java/com/example/industrialai/agent/rag/IndustrialRagService.java)
-- [PushLogReadOnlyTools.java](iiot-mcp-server/src/main/java/com/example/industrialai/mcp/PushLogReadOnlyTools.java)
-- [PushLogApiClient.java](iiot-mcp-server/src/main/java/com/example/industrialai/mcp/PushLogApiClient.java)
+- [PushLogReadOnlyTools.java](iiot-api-server/src/main/java/com/example/industrialai/iiot/mcp/PushLogReadOnlyTools.java)
 - [PushLogController.java](iiot-api-server/src/main/java/com/example/industrialai/iiot/PushLogController.java)
 - [PushLogQueryService.java](iiot-api-server/src/main/java/com/example/industrialai/iiot/PushLogQueryService.java)
 - [JdbcPushLogDataProvider.java](iiot-api-server/src/main/java/com/example/industrialai/iiot/JdbcPushLogDataProvider.java)

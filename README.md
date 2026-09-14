@@ -3,17 +3,19 @@
 这是一个基于 Spring AI 的知识库问答应用，支持文档 RAG 和只读 push-log 告警统计。设备、测点和工单查询链路已移除。
 
 ```text
-REST/SSE -> Spring AI -> Chat Model
-                      |-> RAG -> Vector Store
-                      `-> MCP -> push-log API -> PostgreSQL
+Client -> industrial-agent-app -> Chat Model
+                    |          -> RAG -> Vector Store
+                    `-- MCP --> iiot-api-server -> PostgreSQL
+                                 `-> REST API
 ```
+
+运行时只有两个服务：Agent 服务和 IIoT 业务服务。MCP 是 IIoT 业务服务提供的一种接口，不再单独部署中转服务。
 
 ## 工程结构
 
 ```text
 industrial-common/       push-log 统计 DTO
-iiot-api-server/         push-log 只读 REST API，端口 8081
-iiot-mcp-server/         push-log 只读 MCP Server，端口 8082
+iiot-api-server/         push-log 业务、REST API 与 MCP Server，端口 8081
 industrial-agent-app/    知识库、MCP 客户端与问答页面，端口 8080
 infra/postgresql/        pgvector 初始化脚本
 ```
@@ -43,12 +45,11 @@ createdb -U postgres industrial_ai
 psql -U postgres -d industrial_ai -f infra/postgresql/init.sql
 ```
 
-构建后，分别启动 push-log API、MCP Server 和 Agent：
+构建后，分别启动 IIoT 业务服务和 Agent：
 
 ```powershell
 mvn clean verify
 mvn -pl iiot-api-server spring-boot:run
-mvn -f iiot-mcp-server/pom.xml spring-boot:run
 mvn -f industrial-agent-app/pom.xml spring-boot:run
 ```
 
@@ -68,6 +69,7 @@ POST   /api/documents
 DELETE /api/documents/{id}
 GET    /api/iiot/push-logs/channels
 GET    /api/iiot/push-logs/statistics
+POST   /mcp
 GET    /actuator/health
 ```
 
@@ -80,8 +82,8 @@ GET    /actuator/health
 | `ZHIPU_CHAT_MODEL` | `glm-4-flash` | 对话模型 |
 | `ZHIPU_EMBEDDING_MODEL` | `embedding-3` | 嵌入模型 |
 | `IIOT_PROVIDER_TYPE` | `in-memory` | push-log 数据源：`in-memory` 或 `jdbc` |
-| `IIOT_API_BASE_URL` | `http://localhost:8081` | MCP Server 访问的 push-log API |
-| `MCP_SERVER_BASE_URL` | `http://localhost:8082` | Agent 访问的 MCP Server |
+| `IIOT_MCP_BASE_URL` | `http://localhost:8081` | Agent 访问的 IIoT MCP 地址 |
+| `MCP_SERVER_BASE_URL` | — | 旧版兼容变量；建议改用 `IIOT_MCP_BASE_URL` |
 | `IIOT_DB_URL` | 使用 `PGVECTOR_URL` | push-log 数据库 JDBC URL |
 | `PGVECTOR_URL` | `jdbc:postgresql://localhost:5432/industrial_ai` | pgvector JDBC URL |
 | `PGVECTOR_USERNAME` | `postgres` | 数据库用户名 |

@@ -59,3 +59,6 @@ Agent 的 `/api/chat` 请求改为：
 
 Agent 必须通过 MCP 工具 `get_push_log_alarm_statistics` 获取真实统计结果，
 不能自行估算告警数量。
+
+MCP Tool 和 REST API 由同一个 `iiot-api-server` 提供。Tool 直接复用
+`PushLogQueryService`，不再经过独立 MCP 服务和内部 HTTP 转发。

@@ -4,6 +4,14 @@ server:
 spring:
   application:
     name: iiot-api-server
+  ai:
+    mcp:
+      server:
+        name: iiot-readonly-tools
+        version: 0.3.0
+        type: SYNC
+        protocol: STREAMABLE
+        instructions: 提供只读工业业务查询能力；push_log 的 channel 代表车间或工序。
   datasource:
     url: ${IIOT_DB_URL:${PGVECTOR_URL:jdbc:postgresql://10.162.21.87:5432/iot_ai}}
     username: ${IIOT_DB_USERNAME:${PGVECTOR_USERNAME:postgres}}
